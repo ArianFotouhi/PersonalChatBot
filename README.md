@@ -48,4 +48,23 @@ Final Answer: The title of the album with AlbumId = 3 is Restless and Wild.
 
 
 app_manual.py
-Answer - False!
+Answer - Correct!
+Note: in this test, only one table of database and its corresponding columns are described to the model. Therefore, it is not able to reply the questions regarding whole tables.
+```
+Prompt: Give me the highest Total rate of 2012 
+```
+
+```
+Answer: 23.86
+```
+
+app_manual.py
+Answer - Correct!
+```
+Prompt: Hi 
+```
+
+```
+Answer: Hi there! How can I help you?
+```
+
