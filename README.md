@@ -73,3 +73,22 @@ Answer: Hi there! How can I help you?
 ## Conversational Memory
 
 The upgraded version of "app_manual.py" is now known as "app_manual_memory.py," introducing a significant change in how it operates. In this new version, the model's responses are noticeably impacted by the chat history. To illustrate this point:
+
+app_manual_memory.py
+```
+Prompt: Date of oldest billingcountry related to Canada in the table
+```
+
+```
+Answer: 2009-01-06 00:00:00
+```
+
+app_manual_memory.py
+```
+Prompt: and the most recent one?
+```
+
+```
+Answer: 2013-12-06 00:00:00
+```
+
