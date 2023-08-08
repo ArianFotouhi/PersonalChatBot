@@ -69,6 +69,6 @@ Prompt: Hi
 Answer: Hi there! How can I help you?
 ```
 
-<hr>
+## Conversational Memory
 
 The upgraded version of "app_manual.py" is now known as "app_manual_memory.py," introducing a significant change in how it operates. In this new version, the model's responses are noticeably impacted by the chat history. To illustrate this point:
