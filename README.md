@@ -92,3 +92,11 @@ Prompt: and the most recent one?
 Answer: 2013-12-06 00:00:00
 ```
 
+app_manual_memory.py
+```
+Prompt: Great
+```
+
+```
+Answer: Great! Is there anything else I can help you with?
+```
