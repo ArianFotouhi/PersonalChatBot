@@ -1,5 +1,6 @@
 # ChatBot to reply based on personal SQL DB
 
+## DB Query (auto vs manual)
 In order to develop a chatbot capable of responding to user queries extracted from a database, two distinct approaches, named "app_auto.py" and "app_manual.py," have been devised. The primary objective of this project involves effectively categorizing incoming questions into either specific inquiries requiring database retrieval or general questions encompassing greetings and general knowledge topics. To achieve this, the model must seamlessly address general queries without resorting to SQL queries, while also responding to database-specific questions by generating SQL-based outputs.
 
 The first approach, "app_auto.py," leverages the agent toolkit of Langchain. This method necessitates minimal effort from the development side. However, it exhibits certain limitations such as inefficient utilization of OpenAI credits and latency concerns. Furthermore, its performance in accurately distinguishing between general and query-based questions has proven to be unreliable.
