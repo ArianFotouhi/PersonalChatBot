@@ -20,10 +20,9 @@ def get_tables_and_columns_sqlite(connection):
 
     return tables_columns
 
-# Create an SQLite connection
-con = sqlite3.connect("chinook.db")
-table_info = get_tables_and_columns_sqlite(con)
-
+# Create a temp SQLite connection
+with sqlite3.connect("chinook.db") as con:
+    table_info = get_tables_and_columns_sqlite(con)
 
 prompt = (
     PromptTemplate.from_template(
