@@ -39,15 +39,18 @@ prompt = (
 
 
 history = []
-model = ChatOpenAI(openai_api_key="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")
+model = ChatOpenAI(openai_api_key="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")
 chain = LLMChain(llm=model, prompt=prompt)
 
 
 while True:
+    
     question = input('Ask me: ')
     ans = chain.run(question = question,sql_type="SQLite", table_info=table_info, history=history)
     print(ans)
-    history.append({'Human': question, 'AI model': ans})
+    print('history', history)
+    history.insert(0, {'Human': question, 'AI model': ans})
+    
     if len(history)>memory_length:
         history = history[-1*memory_length:]
     try:
