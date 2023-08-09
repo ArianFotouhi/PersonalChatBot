@@ -3,6 +3,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.chains import LLMChain
 import sqlite3
 
+memory_length = 4
 
 def get_tables_and_columns_sqlite(connection):
     tables_columns = {}
@@ -47,8 +48,8 @@ while True:
     ans = chain.run(question = question,sql_type="SQLite", table_info=table_info, history=history)
     print(ans)
     history.append({'Human': question, 'AI model': ans})
-    if len(history)>3:
-        history = history[-3:]
+    if len(history)>memory_length:
+        history = history[-1*memory_length:]
     try:
 
         con = sqlite3.connect("chinook.db")
