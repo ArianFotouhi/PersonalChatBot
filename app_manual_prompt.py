@@ -28,24 +28,27 @@ prompt = (
     PromptTemplate.from_template(
         """
         your question is: {question}
-        -if the question is about a query: ONLY return the {sql} query without extra words show it like eg SELECT * FROM ...
+        -if the question is about a query: ONLY return the {sql_type} query without extra words show it like eg SELECT * FROM ...
 
         -if the question is not about a query: forget about query just relpy noramlly (eg greeting, answering a general knowledge question) and do not say anything about mt database and table)
         """)
     + "\n\n , for query  assume i have my tables (key) and columns (their value) as {table_info}"
+    + "also this your chat history: {history}"
 )
 
 
-
-model = ChatOpenAI(openai_api_key="")
+history = []
+model = ChatOpenAI(openai_api_key="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")
 chain = LLMChain(llm=model, prompt=prompt)
 
 
 while True:
     question = input('Ask me: ')
-    ans = chain.run(question = question,sql="SQLite", table_info=table_info)
+    ans = chain.run(question = question,sql_type="SQLite", table_info=table_info, history=history)
     print(ans)
-    
+    history.append({'Human': question, 'AI model': ans})
+    if len(history)>3:
+        history = history[-3:]
     try:
 
         con = sqlite3.connect("chinook.db")
