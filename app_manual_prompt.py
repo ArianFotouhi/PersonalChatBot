@@ -47,7 +47,7 @@ while True:
     ans = chain.run(question = question,sql="SQLite", table_info=table_info)
     print(ans)
     
-    try: 
+    try:
 
         con = sqlite3.connect("chinook.db")
         cur = con.cursor()
