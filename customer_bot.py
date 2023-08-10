@@ -43,4 +43,4 @@ while True:
     history.insert(0, {'Human user': question, 'customer bot': ans, 'time':datetime.datetime.now()})
 
     if len(history)>memory_length:
-        history = history[-1*memory_length:]
+        history = history[:memory_length]
