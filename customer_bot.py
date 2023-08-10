@@ -2,22 +2,28 @@ from langchain.prompts import PromptTemplate
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import LLMChain
 import datetime
-memory_length = 4
+
+from langchain.llms import OpenAI
+
+memory_length = 20
 
 prompt = (
     PromptTemplate.from_template(
-        """you are a helpful customer service bot
+        """you are a customer service bot who is nice (please do not explain something that is not asked, keep replies short)
         previous conversation: {history}
-        proceed the chat based on chat history, only reply to new question and no full reply of whole chat (not creation of chat)"""
+        proceed the chat (eg do not say hello/hi/greeting when chat history in not empty) based on chat history, only reply to new question and based on chat history (not creation of chat)"""
         +
         """
         new human question is: {question}
          as to the customer resolution:
-        -if customer wanted to cancel membership, ask them to email: cancel@ieg.com
-        -if customer wanted to extend membership, ask them to email: extend@ieg.com
-        -if customer wanted to be refunded regarding membership, ask them to email: refund@ieg.com
-        and before ending the chat make sure is there anything else we can help with
-        if there was no new task, just say goodbye and wish a nice day
+
+        -if customer wanted to extend service, ask them to email: extend@ieg.com (do not mention it if not asked)
+        -if customer wanted to be refunded regarding service, ask them to email: refund@ieg.com (do not mention it if not asked)
+        -if customer wanted to cancel service, ask them to email: cancel@ieg.com (do not mention it if not asked)
+
+        also if the does not know reason of anything, sincerely it should say i am not aware of that but you can contact info@ieg.com to ask (do not mention it if not asked)
+        for only information of customer bot, do not make up new email addresses
+ 
         """)
         + "\n\n , also the name of customer that you are talking is {name}"
         +"also reply in language {language}"
@@ -25,13 +31,13 @@ prompt = (
 )
 
 history = []
-model = ChatOpenAI(openai_api_key="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")
+model = OpenAI(temperature=0, openai_api_key="")
 chain = LLMChain(llm=model, prompt= prompt)
 
 while True:
 
     question = input('Ask me: ')
-    ans = chain.run(question = question, name= "Edward", history=history, language='English')
+    ans = chain.run(question = question, name= "Edward", history=history, language='Spanish')
     print(ans)
     print('history', history)
     history.insert(0, {'Human user': question, 'customer bot': ans, 'time':datetime.datetime.now()})
