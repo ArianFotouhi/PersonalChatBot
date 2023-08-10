@@ -83,7 +83,7 @@ Prompt: Date of oldest billingcountry related to Canada in the table
 Answer: 2009-01-06 00:00:00
 ```
 
-app_manual_memory.py
+app_manual_memory.py (this type of question requires memory)
 ```
 Prompt: and the most recent one?
 ```
