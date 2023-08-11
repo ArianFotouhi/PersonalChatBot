@@ -13,7 +13,6 @@ my_openai_key = ""
 openai.api_key = my_openai_key
 
 
-
 def get_flight_info(origin, destination):
 
     # Example output returned from an API or database
@@ -90,7 +89,7 @@ with sqlite3.connect("chinook.db") as con:
 function_descriptions_multiple = [
     {
         "name": "get_flight_info",
-        "description": "Get flight information between two locations",
+        "description": "Get information of a specific flight",
         "parameters": {
             "type": "object",
             "properties": {
@@ -124,7 +123,7 @@ function_descriptions_multiple = [
 
 
 
-llm = ChatOpenAI(model="gpt-3.5-turbo-0613", temperature=0, openai_api_key= my_openai_key)
+llm = ChatOpenAI(model="gpt-3.5-turbo-0613", temperature=0, openai_api_key = my_openai_key)
 while True:
 
     user_prompt_ = input('ask me: ')
