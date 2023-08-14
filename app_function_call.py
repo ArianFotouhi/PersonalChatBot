@@ -2,20 +2,20 @@ import json
 import openai
 from datetime import datetime
 from langchain.chat_models import ChatOpenAI
-from langchain.schema import HumanMessage, AIMessage
-
+from langchain.schema import HumanMessage, SystemMessage, AIMessage
 import sqlite3
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 
 
-my_openai_key = ""
+my_openai_key = "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"
 openai.api_key = my_openai_key
+memory_length = 20
+history = []
 
 
 def get_flight_info(origin, destination):
 
-    # Example output returned from an API or database
     flight_info = {
         "origin": origin,
         "destination": destination,
@@ -24,26 +24,27 @@ def get_flight_info(origin, destination):
         "flight": "Q491",
     }
 
-    return json.dumps(flight_info)
+    return json.dumps(flight_info), None
 
 
 def db_query(user_prompt):
-
+    print('I AM IN DB_QUERY')
+    print('history', history[:2])
     prompt = (
         PromptTemplate.from_template(
             """
-            your question is: {user_prompt}
+            your Human user question is: {user_prompt} with conversation history of:
+            {history}
             ONLY return the {sql_type} query without extra words show it like eg SELECT * FROM ...
-
             """)
         + 
-        "\n\n , for query  assume i have my tables (key) and columns (their value) as {table_info}"
+        "\n\n , Query assumption:  I have my tables (key) and columns (their value) as {table_info}"
     )
-   
+
     model = ChatOpenAI(temperature=0, openai_api_key= my_openai_key)
     chain = LLMChain(llm=model, prompt= prompt)
 
-    ans = chain.run(user_prompt = user_prompt, sql_type= "SQLite", table_info=table_info)
+    ans = chain.run(user_prompt = user_prompt, sql_type= "SQLite", table_info = table_info, history = history[:2])
 #    print('sql in function', ans)
     try:
 
@@ -56,14 +57,15 @@ def db_query(user_prompt):
 #        for table in tables:
 #            print(table)
 
-        # Close the cursor and the connection
+        #Close the cursor and the connection
         cur.close()
         con.close()
-        return str(tables)
+        return f'Query result for {user_prompt} is: '+str(tables), ans
+
     except Exception as e:
         print('Sorry the search was unsuccessful, could you please try again with more specific information')
         print(e)
-        return None
+        return None, 'Query was not created'
 
 
 def get_tables_and_columns_sqlite(connection):
@@ -122,39 +124,76 @@ function_descriptions_multiple = [
     ]
 
 
-
 llm = ChatOpenAI(model="gpt-3.5-turbo-0613", temperature=0, openai_api_key = my_openai_key)
 while True:
 
+    system_message = f"""You are a data interpreter bot. Consider the conversation history in chat:
+    history: {history}
+    """
+    
+    print('history', system_message)
+
     user_prompt_ = input('ask me: ')
+
     first_response = llm.predict_messages(
-        [HumanMessage(content=user_prompt_)], functions=function_descriptions_multiple
+    [HumanMessage(content=user_prompt_),
+    SystemMessage(content=system_message),],
+    functions = function_descriptions_multiple,
     )
 
-    
+    if len(history) > memory_length:
+        history = history[:memory_length]
+   
     try:
         params = first_response.additional_kwargs["function_call"]["arguments"]
         params = params.strip()
         params = json.loads(params)
 
         chosen_function = eval(first_response.additional_kwargs["function_call"]["name"])
-        func_output = chosen_function(**params)
+        func_output_1, func_output_2  = chosen_function(**params)
 
         second_response = llm.predict_messages(
         [
-            HumanMessage(content=user_prompt_),
-            AIMessage(content=str(first_response.additional_kwargs)),
+            HumanMessage(content = user_prompt_),
+            SystemMessage(content=system_message),
+            AIMessage(content = str(first_response.additional_kwargs)),
             AIMessage(
-                role="function",
-                additional_kwargs={
+                role = "function",
+                additional_kwargs = {
                     "name": first_response.additional_kwargs["function_call"]["name"]
                 },
-                content= func_output,
+                content = func_output_1,
             ),
         ],
-            functions=function_descriptions_multiple,
+            functions = function_descriptions_multiple,
         )
-        print(second_response.content)
-    
-    except:
-        print(first_response.content)
+
+        print('second_response', second_response.content)
+        print('func out', func_output_1)
+
+        history.insert(0,
+        {'Human user': user_prompt_,
+        'bot':{
+        'bot shown reply': second_response.content,
+        'bot chosen function (hidden to user)': first_response.additional_kwargs["function_call"]["name"],
+        'SQL created for user prompt (hidden to user)': func_output_2,
+        },
+        'time': datetime.now()}
+        )
+
+    except Exception as e:
+        print('error in main', e)
+        history.insert(0,
+        {'Human user': user_prompt_,
+        'bot':{
+        'bot shown reply': first_response.content,
+        'bot chosen function (hidden to user)': None,
+        'bot chosen function inputs (hidden to user)': None,
+        },
+        'Time': datetime.now()}
+        )
+        if first_response.content:
+            print(first_response.content)
+        else:
+            print(first_response)
+            
