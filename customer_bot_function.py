@@ -2,23 +2,30 @@ import json
 import openai
 from datetime import datetime
 from langchain.chat_models import ChatOpenAI
-from langchain.schema import HumanMessage, AIMessage
+from langchain.schema import HumanMessage, SystemMessage, AIMessage
 
 import sqlite3
-from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 
 my_openai_key = ""
 openai.api_key = my_openai_key
+memory_length = 20
+history = []
 
 
 def cancel_service():
     ans = input('please say yes if you are sure to cancel your service? ')
+    
     if ans.lower() == 'yes':
         pass
     else:
-        return 'The request is not created for cancelation'
-    return 'Based on the received account detail the request is submitted, please email to cancel@company.com as the final step. Have a nice day!'
+        output =  'The request is not created for cancelation'
+        history.insert(0, {'Customer bot': output })
+        return output
+    
+    output = 'Based on the received account detail the request is submitted, please email to cancel@company.com as the final step. Have a nice day!'
+    history.insert(0, {'Customer bot': output })
+    return output
 
 def extend_service(extension_period):
     ans = input(f"""please say yes if you request to extend your service for {extension_period} months
@@ -27,16 +34,29 @@ def extend_service(extension_period):
                 If you want to cancel this request say quit
         """)
     if ans.lower() == 'yes':
-        return f'Service extended for {extension_period} months. Please email extend@company.com in case of further inqueries'
+        output = f'Service extended for {extension_period} months. Please email extend@company.com in case of further inqueries'
+        history.insert(0, {'Customer bot': output })
+        return output
+
+
     elif ans.lower() == 'no':
-        return 'The request is canceled for service extension'
+        output =  'The request is canceled for service extension'
+        history.insert(0, {'Customer bot': output })
+        return output
+    
     else:
         ans = input(f'How many months extend? Also you can cancel by saying quit')
         if ans.lower() == 'quite':
-            return 'The request is canceled for service extension'
+            output =  'The request is canceled for service extension'
+            history.insert(0, {'Customer bot': output })
+            return output
+
         else:
-            return f'Service extended for {extension_period} months. Please email extend@company.com in case of further inqueries'
-        
+
+            output =  f'Service extended for {extension_period} months. Please email extend@company.com in case of further inqueries'
+            history.insert(0, {'Customer bot': output })
+            return output
+
 def refund(refund_reason, refund_amount):
     ans = input(f"""Please say yes if you confirm the reason and amount of refund:
                 -Reason:{refund_reason}
@@ -54,7 +74,9 @@ def refund(refund_reason, refund_amount):
         refund_reason = input('Refund Reason: ')
         refund_amount = input('Refund Amount: ')
 
-    return 'Your refund request is received. For further inquiries please contact refund@company.com'
+    output = 'Your refund request is received. For further inquiries please contact refund@company.com'
+    history.insert(0, {'Customer bot': output })
+    return output
 
 
 
@@ -83,6 +105,7 @@ function_descriptions_multiple = [
             "required": ["extension_period"],
         },
     },
+
     {
         "name": "refund",
         "description": "To create refund request",
@@ -98,23 +121,39 @@ function_descriptions_multiple = [
                     "description": "The amount of requested refund in CAD (Canadian $)",
                 },
             },
-
             "required": ["refund_reason","refund_amount"],
         },
     },
+
     ]
 
 
 
 
 llm = ChatOpenAI(model="gpt-3.5-turbo-0613", temperature=0, openai_api_key = my_openai_key)
+
+
+
 while True:
+    system_message = f"""You are a Customer Service Bot. Consider the conversation history in chat:
+    history: {history}
+    """
+    print('history', system_message)
 
     user_prompt_ = input('ask me: ')
+
     first_response = llm.predict_messages(
-        [HumanMessage(content=user_prompt_)], functions=function_descriptions_multiple
+    [HumanMessage(content=user_prompt_),
+    SystemMessage(content=system_message),],
+    functions=function_descriptions_multiple,
     )
 
+    
+    
+    
+
+    if len(history)>memory_length:
+        history = history[:memory_length]
     
     try:
         params = first_response.additional_kwargs["function_call"]["arguments"]
@@ -138,7 +177,12 @@ while True:
         ],
             functions=function_descriptions_multiple,
         )
-        print(second_response.content)
+        history.insert(0, {'Human user': user_prompt_, 
+          'time':datetime.now()})
+
+        print('this is me', second_response.content)
     
     except:
+        history.insert(0, {'Human user': user_prompt_, 
+          'Customer bot': first_response.content, 'time':datetime.now()})
         print(first_response.content)
