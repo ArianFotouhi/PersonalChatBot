@@ -8,7 +8,7 @@ from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 
 
-my_openai_key = "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"
+my_openai_key = ""
 openai.api_key = my_openai_key
 memory_length = 20
 history = []
@@ -28,13 +28,13 @@ def get_flight_info(origin, destination):
 
 
 def db_query(user_prompt):
-    print('I AM IN DB_QUERY')
-    print('history', history[:2])
+    cust_history = chat_history_customizer(['bot shown reply', 'bot chosen function (hidden to user)'])
+
     prompt = (
         PromptTemplate.from_template(
             """
             your Human user question is: {user_prompt} with conversation history of:
-            {history}
+            {cust_history}
             ONLY return the {sql_type} query without extra words show it like eg SELECT * FROM ...
             """)
         + 
@@ -44,8 +44,7 @@ def db_query(user_prompt):
     model = ChatOpenAI(temperature=0, openai_api_key= my_openai_key)
     chain = LLMChain(llm=model, prompt= prompt)
 
-    ans = chain.run(user_prompt = user_prompt, sql_type= "SQLite", table_info = table_info, history = history[:2])
-#    print('sql in function', ans)
+    ans = chain.run(user_prompt = user_prompt, sql_type= "SQLite", table_info = table_info, cust_history = cust_history[:2])
     try:
 
         con = sqlite3.connect("chinook.db")
@@ -55,7 +54,6 @@ def db_query(user_prompt):
         tables = cur.fetchall()
 
 #        for table in tables:
-#            print(table)
 
         #Close the cursor and the connection
         cur.close()
@@ -63,8 +61,6 @@ def db_query(user_prompt):
         return f'Query result for {user_prompt} is: '+str(tables), ans
 
     except Exception as e:
-        print('Sorry the search was unsuccessful, could you please try again with more specific information')
-        print(e)
         return None, 'Query was not created'
 
 
@@ -83,6 +79,18 @@ def get_tables_and_columns_sqlite(connection):
             tables_columns[table_name] = column_names
 
         return tables_columns
+
+def chat_history_customizer(excluded):
+    cust_history = history    
+    for item in cust_history:
+        for exc in excluded:
+            if len(cust_history) != 0 and exc in list(item['bot'].keys()):
+                item['bot'].pop(exc)
+    return cust_history
+
+    
+
+
 
 
 with sqlite3.connect("chinook.db") as con:
@@ -124,14 +132,15 @@ function_descriptions_multiple = [
     ]
 
 
-llm = ChatOpenAI(model="gpt-3.5-turbo-0613", temperature=0, openai_api_key = my_openai_key)
+llm = ChatOpenAI(model="gpt-3.5-turbo-0613", temperature = 0, openai_api_key = my_openai_key)
 while True:
 
-    system_message = f"""You are a data interpreter bot. Consider the conversation history in chat:
-    history: {history}
+    cust_history = chat_history_customizer(['SQL created for user prompt (hidden to user)'])
+    
+    system_message = f"""You are a data interpreter bot that replies questions by query in database. Consider the conversation history in chat:
+    history: {cust_history}
     """
     
-    print('history', system_message)
 
     user_prompt_ = input('ask me: ')
 
@@ -143,7 +152,7 @@ while True:
 
     if len(history) > memory_length:
         history = history[:memory_length]
-   
+
     try:
         params = first_response.additional_kwargs["function_call"]["arguments"]
         params = params.strip()
@@ -188,7 +197,7 @@ while True:
         'bot':{
         'bot shown reply': first_response.content,
         'bot chosen function (hidden to user)': None,
-        'bot chosen function inputs (hidden to user)': None,
+        'SQL created for user prompt (hidden to user)': None,
         },
         'Time': datetime.now()}
         )
@@ -196,4 +205,3 @@ while True:
             print(first_response.content)
         else:
             print(first_response)
-            
