@@ -100,3 +100,5 @@ Prompt: Great
 ```
 Answer: Great! Is there anything else I can help you with?
 ```
+
+In conclusion, using the manual solution (our code) leads to approximately 10 times less credit usage compared to agent based (auto solution) provided by langchain. Also, agent based solution assumes all questions are related to database query and cannot reply queries about greeting, general knowledge, etc., and that attributes brings pros and cons. As downside, it replies irrelevant and wrong answers to those types of questions and as upside. Regarding the upside, the manual solution sometimes may fail to answer database queries where it assumes the question is general knowledge, e.g., query: date of first canada invoice?
