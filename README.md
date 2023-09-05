@@ -11,7 +11,7 @@ NB: as of August 4, 2023, it's worth noting that the "app_auto.py" code encounte
 
 Here are some test results of two approaches:
 
-app_auto.py
+app_auto_agent.py
 Answer - Correct!
 ```
 Prompt: Describe the the oldest invoice in Canada in invoices table
@@ -28,7 +28,7 @@ Observation: [('2009-01-06 00:00:00',)]
 Final Answer: The oldest invoice date in Canada is 2009-01-06 00:00:00.
 ```
 
-app_auto.py
+app_auto_agent.py
 Answer - False!
 ```
 Prompt: Hey how you doing?
