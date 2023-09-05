@@ -10,6 +10,7 @@ Conversely, the manual approach demonstrates superior accuracy in its outcomes, 
 NB: as of August 4, 2023, it's worth noting that the "app_auto.py" code encounters compatibility issues when executed on Windows platforms. This complication arises from challenges related to the Langchain library, particularly the failure to import "create_sql_agent" from "langchain.agents." It is important to mention that the code is functional within a Unix environment.
 
 Here are some test results of comparing the approaches:
+
 app_auto_agent.py
 Answer - Correct!
 ```
@@ -17,16 +18,31 @@ Prompt: Date of last Canada invoice
 ```
 
 ```
-Thought: I should query the oldest invoice date in Canada
+Thought: I should query the database for the date of the last invoice from Canada
 Action: sql_db_query
-Action Input: SELECT MIN(InvoiceDate) FROM invoices WHERE BillingCountry = 'Canada'
-Observation: [('2009-01-06 00:00:00',)]
+Action Input: SELECT InvoiceDate FROM invoices WHERE BillingCountry = 'Canada' ORDER BY InvoiceDate DESC LIMIT 10;
+Observation: [('2013-12-06 00:00:00',), ('2013-09-20 00:00:00',), ('2013-09-04 00:00:00',), ('2013-09-03 00:00:00',), ('2013-07-12 00:00:00',), ('2013-06-02 00:00:00',), ('2013-06-01 00:00:00',), ('2013-06-01 00:00:00',), ('2013-05-11 00:00:00',), ('2013-03-31 00:00:00',)]
 ```
 
 ```
-Final Answer: The oldest invoice date in Canada is 2009-01-06 00:00:00.
+Final Answer: The date of the last Canada invoice is 2013-12-06 00:00:00.
 ```
 
+app_auto_simple.py
+Answer - False!
+```
+Prompt: Date of last Canada invoice
+```
+
+```
+SQLQuery:SELECT MAX(InvoiceDate) FROM invoices WHERE Country = 'Canada'
+no such column: Country
+[SQL: SELECT MAX(InvoiceDate) FROM invoices WHERE Country = 'Canada']
+```
+
+```
+Final Answer: Error!
+```
 
 
 
