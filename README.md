@@ -5,7 +5,7 @@ In order to develop a chatbot capable of responding to user queries extracted fr
 
 The first approach, "app_auto.py," leverages the agent toolkit of Langchain. This method necessitates minimal effort from the development side. However, it exhibits certain limitations such as inefficient utilization of OpenAI credits and latency concerns. Furthermore, its performance in accurately distinguishing between general and query-based questions has proven to be unreliable.
 
-Conversely, the manual approach demonstrates superior accuracy in its outcomes, coupled with quicker response times (lower latency) and reduced API credit consumption (based on below tests, almost 10 times less credit usuage). Nevertheless, this alternative demands more extensive development efforts and the implementation of tailored prompt engineering practices to refine its outputs according to project requirements. Despite its various advantages, this method is particularly recommended in scenarios where the database contains a relatively modest number of tables and columns. This recommendation stems from the fact that this approach necessitates the provision of descriptions for each of these elements. It's important to note that an inadequate or inefficient description has the potential to confuse the model. This stands in contrast to the automated process employed by "app_auto.py," which handles this aspect automatically.
+Conversely, the manual approach demonstrates superior accuracy in its outcomes, coupled with quicker response times (lower latency) and reduced API credit consumption (based on below tests, almost 4-6 times less credit usuage). Nevertheless, this alternative demands more extensive development efforts and the implementation of tailored prompt engineering practices to refine its outputs according to project requirements. Despite its various advantages, this method is particularly recommended in scenarios where the database contains a relatively modest number of tables and columns. This recommendation stems from the fact that this approach necessitates the provision of descriptions for each of these elements. It's important to note that an inadequate or inefficient description has the potential to confuse the model. This stands in contrast to the automated process employed by "app_auto.py," which handles this aspect automatically.
 
 NB: as of August 4, 2023, it's worth noting that the "app_auto.py" code encounters compatibility issues when executed on Windows platforms. This complication arises from challenges related to the Langchain library, particularly the failure to import "create_sql_agent" from "langchain.agents." It is important to mention that the code is functional within a Unix environment.
 
@@ -13,6 +13,7 @@ Here are some test results of comparing the approaches:
 
 app_auto_agent.py
 Answer - Correct!
+Used Credit - $ 0.07
 ```
 Prompt: Date of last Canada invoice
 ```
@@ -30,6 +31,7 @@ Final Answer: The date of the last Canada invoice is 2013-12-06 00:00:00.
 
 app_auto_simple.py
 Answer - False!
+Used Credit - $ 0.05
 ```
 Prompt: Date of last Canada invoice
 ```
@@ -45,6 +47,21 @@ Final Answer: Error!
 ```
 
 
+
+app_manual.py
+Answer - True!
+Used Credit - $ 0.02
+```
+Prompt: Date of last Canada invoice
+```
+
+```
+SELECT InvoiceDate FROM invoices WHERE BillingCountry = 'Canada' ORDER BY InvoiceDate DESC LIMIT 1"
+```
+
+```
+Final Answer: The date of the last Canada invoice is December 6, 2013.
+```
 
 
 
@@ -148,6 +165,6 @@ Prompt: Great
 Answer: Great! Is there anything else I can help you with?
 ```
 
-In conclusion, using the manual solution (our code) leads to approximately 10 times less credit usage compared to agent based (auto solution) provided by langchain. Also, agent based solution assumes all questions are related to database query and cannot reply queries about greeting, general knowledge, etc., and that attributes brings pros and cons. 
+In conclusion, using the manual solution (our code) leads to approximately 4-6 times less credit usage compared to agent based (auto solution) provided by langchain. Also, agent based solution assumes all questions are related to database query and cannot reply queries about greeting, general knowledge, etc., and that attributes brings pros and cons. 
 
 As downside, agent method replies irrelevant and wrong answers to those types of questions. Regarding the upside of using agent method, the manual solution sometimes may fail to answer database queries where it assumes the question is general knowledge, e.g., query: date of first canada invoice?
