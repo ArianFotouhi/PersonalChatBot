@@ -9,7 +9,38 @@ Conversely, the manual approach demonstrates superior accuracy in its outcomes, 
 
 NB: as of August 4, 2023, it's worth noting that the "app_auto.py" code encounters compatibility issues when executed on Windows platforms. This complication arises from challenges related to the Langchain library, particularly the failure to import "create_sql_agent" from "langchain.agents." It is important to mention that the code is functional within a Unix environment.
 
-Here are some test results of two approaches:
+Here are some test results of comparing the approaches:
+app_auto_agent.py
+Answer - Correct!
+```
+Prompt: Date of last Canada invoice
+```
+
+```
+Thought: I should query the oldest invoice date in Canada
+Action: sql_db_query
+Action Input: SELECT MIN(InvoiceDate) FROM invoices WHERE BillingCountry = 'Canada'
+Observation: [('2009-01-06 00:00:00',)]
+```
+
+```
+Final Answer: The oldest invoice date in Canada is 2009-01-06 00:00:00.
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------
+
 
 app_auto_agent.py
 Answer - Correct!
