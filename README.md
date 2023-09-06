@@ -136,9 +136,9 @@ Answer: Hi there! How can I help you?
 
 ## Conversational Memory
 
-The upgraded version of "app_manual.py" is now known as "app_manual_memory.py," introducing a significant change in how it operates. In this new version, the model's responses are noticeably impacted by the chat history. To illustrate this point:
+The upgraded version of "app_manual.py" features a custom conversational memory. In this new version, the model's responses are noticeably impacted by the chat history. To illustrate this point:
 
-app_manual_memory.py
+app_manual.py
 ```
 Prompt: Date of oldest billingcountry related to Canada in the table
 ```
@@ -147,7 +147,7 @@ Prompt: Date of oldest billingcountry related to Canada in the table
 Answer: 2009-01-06 00:00:00
 ```
 
-app_manual_memory.py (this type of question requires memory)
+app_manual.py (this type of question requires memory)
 ```
 Prompt: and the most recent one?
 ```
@@ -156,7 +156,7 @@ Prompt: and the most recent one?
 Answer: 2013-12-06 00:00:00
 ```
 
-app_manual_memory.py
+app_manual.py
 ```
 Prompt: Great
 ```
