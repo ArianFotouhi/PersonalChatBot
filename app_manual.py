@@ -13,6 +13,7 @@ openai.api_key = my_api_key
 memory_length = 20
 history = []
 
+debugger_print = False
 
 def get_flight_info(origin, destination):
 
@@ -28,10 +29,14 @@ def get_flight_info(origin, destination):
 
 
 def db_query(user_prompt):
-    print('I AM IN DB_QUERY')
+    if debugger_print:
+        print('I AM IN DB_QUERY')
+    
     cust_history = chat_history_customizer(['bot shown reply', 'bot chosen function (hidden to user)'])
-
-    print('history in dbquery', cust_history[:2])
+    
+    if debugger_print:
+        print('history in dbquery', cust_history[:2])
+    
     prompt = (
         PromptTemplate.from_template(
             """
@@ -65,8 +70,9 @@ def db_query(user_prompt):
         return f'Query result for {user_prompt} is: '+str(tables), ans
 
     except Exception as e:
-        print('Sorry the search was unsuccessful, could you please try again with more specific information')
-        print(e)
+        if debugger_print:
+            print('Sorry the search was unsuccessful, could you please try again with more specific information')
+            print(e)
         return None, 'Query was not created'
 
 
@@ -87,7 +93,9 @@ def get_tables_and_columns_sqlite(connection):
         return tables_columns
 
 def chat_history_customizer(excluded):
-    print('history in customizer', history)
+    if debugger_print:
+        print('history in customizer', history)
+    
     cust_history = history    
     for item in cust_history:
         for exc in excluded:
@@ -95,7 +103,7 @@ def chat_history_customizer(excluded):
                 item['bot'].pop(exc)
     return cust_history
 
-    
+
 
 
 
@@ -147,8 +155,8 @@ while True:
     system_message = f"""You are a data interpreter bot that replies questions by query in database. Consider the conversation history in chat:
     history: {cust_history}
     """
-    
-    print('history in main', system_message)
+    if debugger_print:
+        print('history in main', system_message)
 
     user_prompt_ = input('ask me: ')
 
@@ -184,9 +192,10 @@ while True:
         ],
             functions = function_descriptions_multiple,
         )
-
-        print('second_response', second_response.content)
-        print('func out', func_output_1)
+       
+        #if debugger_print:
+        print('Response:', second_response.content)
+        #print('func out', func_output_1)
 
         history.insert(0,
         {'Human user': user_prompt_,
@@ -199,7 +208,9 @@ while True:
         )
 
     except Exception as e:
-        print('error in main', e)
+        if debugger_print:
+            print('error in main', e)
+    
         history.insert(0,
         {'Human user': user_prompt_,
         'bot':{
